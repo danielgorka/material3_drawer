@@ -1,7 +1,7 @@
 name: material3_drawer
-description: A new Flutter package project.
-version: 0.0.1
-homepage:
+description: Material 3 Navigation Drawer component.
+version: 1.0.0
+homepage: https://github.com/danielgorka/material3_drawer
 
 environment:
   sdk: '>=2.18.0 <3.0.0'
