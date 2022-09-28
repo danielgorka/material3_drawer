@@ -1,39 +1,60 @@
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+## Material 3 Navigation Drawer
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+Material 3 Navigation Drawer component which can animate between expanded 
+([Navigation Drawer](https://m3.material.io/components/navigation-drawer/overview)) 
+and collapsed state 
+([Navigation Rail](https://m3.material.io/components/navigation-rail/overview)).
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
-
-## Features
-
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+!["Material 3 Navigation Drawer - example"](example/demo.gif)
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
 ```dart
-const like = 'sample';
+Row(
+    children: [
+      NavigationDrawer(
+        collapsible: true,
+        headerBuilder: (context, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 64, 16, 16),
+              child: Text(
+                'Header',
+                style: Theme.of(context).textTheme.headlineSmall,
+                maxLines: 1,
+              ),
+            ),
+          );
+        },
+        selectedIndex: _index,
+        items: [
+          NavigationDrawerItem(
+            icon: const Icon(Icons.looks_one),
+            label: 'Item 1',
+          ),
+          NavigationDrawerItem(
+            icon: const Icon(Icons.looks_two),
+            label: 'Item 2',
+          ),
+          NavigationDrawerItem(
+            icon: const Icon(Icons.looks_3),
+            label: 'Item 3',
+            indicator: '2',
+          ),
+        ],
+        onItemTap: (index) {
+          setState(() {
+            _index = index;
+          });
+        },
+      ),
+      Expanded(
+        // Currently selected page
+        child: Center(
+          child: Text('Item: ${_index + 1}'),
+        ),
+      ),
+    ],
+  )
 ```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
