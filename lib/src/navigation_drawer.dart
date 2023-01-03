@@ -67,6 +67,7 @@ class NavigationDrawer extends StatefulWidget {
     this.mainAnimationDuration = const Duration(milliseconds: 300),
     this.curve = Curves.easeInOutCubic,
     this.showRailLabel = true,
+    this.elevation = 3,
   }) : shortDuration = mainAnimationDuration ~/ 3;
 
   /// The initial state of the drawer.
@@ -124,6 +125,11 @@ class NavigationDrawer extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool showRailLabel;
+
+  /// The elevation of the drawer.
+  ///
+  /// Defaults to 3.
+  final double elevation;
 
   @override
   State<NavigationDrawer> createState() => _NavigationDrawerState();
@@ -226,8 +232,9 @@ class _NavigationDrawerState extends State<NavigationDrawer>
     return SizedBox(
       width: _widthAnimation.value,
       child: Material(
-        elevation: 1,
-        surfaceTintColor: Theme.of(context).colorScheme.primary,
+        elevation: widget.elevation,
+        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
+        color: Theme.of(context).colorScheme.surface,
         child: ListView(
           padding: const EdgeInsets.only(bottom: 16),
           children: _buildItems(context),
@@ -256,7 +263,7 @@ class _NavigationDrawerState extends State<NavigationDrawer>
                       BoxShadow(
                         color: ElevationOverlay.applySurfaceTint(
                           Theme.of(context).colorScheme.surface,
-                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.surfaceTint,
                           1,
                         ),
                         blurRadius: 15,
