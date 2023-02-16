@@ -8,8 +8,8 @@ typedef ToggleWidgetBuilder = Widget Function(
 
 class WidgetSwitcher extends StatefulWidget {
   const WidgetSwitcher({
-    super.key,
     required this.builder,
+    super.key,
   });
 
   final ToggleWidgetBuilder builder;

@@ -55,13 +55,13 @@ typedef HeaderBuilder = Widget Function(
 class NavigationDrawer extends StatefulWidget {
   /// Creates a Material 3 Navigation Drawer component.
   const NavigationDrawer({
+    required this.items,
     super.key,
     this.initialState = DrawerState.expanded,
     this.collapsible = false,
     this.selectedIndex,
     this.onItemTap,
     this.headerBuilder,
-    required this.items,
     this.itemBorderRadius = const BorderRadius.all(Radius.circular(32)),
     this.mainAnimationDuration = const Duration(milliseconds: 300),
     this.curve = Curves.easeInOutCubic,
