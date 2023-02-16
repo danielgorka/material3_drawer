@@ -1,5 +1,4 @@
-import 'package:badges/badges.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationDrawer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material3_drawer/src/navigation_drawer.dart';
 
@@ -73,8 +72,8 @@ void main() {
 
           final finder = find.byType(Badge).first;
           final badge = tester.widget<Badge>(finder);
-          expect(badge.showBadge, isFalse);
-          expect(find.text('2'), findsNWidgets(2));
+          expect(badge.isLabelVisible, isFalse);
+          expect(find.text('2'), findsOneWidget);
         },
       );
 
@@ -108,7 +107,7 @@ void main() {
 
           final finder = find.byType(Badge).first;
           final badge = tester.widget<Badge>(finder);
-          expect(badge.showBadge, isTrue);
+          expect(badge.isLabelVisible, isTrue);
           expect(find.text('2'), findsOneWidget);
         },
       );
@@ -144,7 +143,7 @@ void main() {
 
           final finder = find.byType(Badge).first;
           final badge = tester.widget<Badge>(finder);
-          expect(badge.showBadge, isTrue);
+          expect(badge.isLabelVisible, isTrue);
           expect(find.text('2'), findsOneWidget);
         },
       );

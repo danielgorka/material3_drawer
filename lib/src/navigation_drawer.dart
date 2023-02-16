@@ -1,4 +1,3 @@
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 
 /// A Material 3 [NavigationDrawer] item.
@@ -401,13 +400,9 @@ class _Item extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Badge(
-                          showBadge: item.indicator != null &&
+                          isLabelVisible: item.indicator != null &&
                               mainAnimation.isDismissed,
-                          padding: const EdgeInsets.all(6),
-                          position: const BadgePosition(end: -8, top: -10),
-                          animationType: BadgeAnimationType.scale,
-                          badgeColor: Theme.of(context).errorColor,
-                          badgeContent: Text(
+                          label: Text(
                             item.indicator ?? '',
                             style: Theme.of(context)
                                 .textTheme
