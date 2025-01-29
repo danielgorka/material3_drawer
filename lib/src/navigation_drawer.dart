@@ -16,6 +16,8 @@ class NavigationDrawerItem {
   NavigationDrawerItem({
     required this.label,
     required this.icon,
+    this.shortLabel,
+    this.selectedIcon,
     this.indicator,
   });
 
@@ -26,6 +28,19 @@ class NavigationDrawerItem {
   /// The [Widget] (usually an [Icon]) that's displayed for this
   /// [NavigationDrawerItem].
   final Widget icon;
+
+  /// The short text label that appears in the rail.
+  ///
+  /// If not provided, [label] is used.
+  final String? shortLabel;
+
+  /// The [Widget] (usually an [Icon]) that's displayed for this
+  /// [NavigationDrawerItem] when it's selected collapsed state.
+  ///
+  /// For expanded state always [icon] is used.
+  ///
+  /// If not provided, [icon] is used.
+  final Widget? selectedIcon;
 
   /// The indicator that appears on the top right corner of
   /// the collapsed item or next to label of the expanded item.
@@ -353,6 +368,8 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final activeColor = Theme.of(context).colorScheme.secondaryContainer;
+    final collapsed = mainAnimation.isDismissed;
+
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: showRailLabel ? 4 + mainAnimation.value * 8 : 12,
@@ -361,7 +378,7 @@ class _Item extends StatelessWidget {
             : mainAnimation.value * 4,
       ),
       child: _IndicatorInkWell(
-        railLabelVisible: showRailLabel && reversedAnimation.isDismissed,
+        railLabelVisible: showRailLabel && collapsed,
         onTap: onTap,
         borderRadius: borderRadius,
         child: Column(
@@ -393,8 +410,7 @@ class _Item extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Badge(
-                          isLabelVisible: item.indicator != null &&
-                              mainAnimation.isDismissed,
+                          isLabelVisible: item.indicator != null && collapsed,
                           label: Text(
                             item.indicator ?? '',
                             style: Theme.of(context)
@@ -405,7 +421,10 @@ class _Item extends StatelessWidget {
                                   fontWeight: FontWeight.w200,
                                 ),
                           ),
-                          child: item.icon,
+                          child:
+                              selected && collapsed && item.selectedIcon != null
+                                  ? item.selectedIcon
+                                  : item.icon,
                         ),
                         Flexible(
                           child: SizeTransition(
@@ -451,7 +470,7 @@ class _Item extends StatelessWidget {
                       children: [
                         const SizedBox(height: 4),
                         Text(
-                          item.label,
+                          item.shortLabel ?? item.label,
                           style: Theme.of(context)
                               .textTheme
                               .labelMedium
