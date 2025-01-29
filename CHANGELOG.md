@@ -1,3 +1,7 @@
+## 1.0.4
+
+* Add `shortLabel` and `selectedIcon` parameters
+
 ## 1.0.3
 
 * Update widget to latest Material specs
