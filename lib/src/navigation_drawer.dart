@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+const double _kCircularIndicatorDiameter = 56;
+const double _kIndicatorHeight = 32;
+
+const _drawerWidth = 304.0;
+const _railWidth = 80.0;
+
 /// A Material 3 [NavigationDrawer] item.
 ///
 /// Displays an icon, a label and an indicator.
@@ -67,6 +73,7 @@ class NavigationDrawer extends StatefulWidget {
     this.curve = Curves.easeInOutCubic,
     this.showRailLabel = true,
     this.elevation = 3,
+    this.color,
   }) : shortDuration = mainAnimationDuration ~/ 3;
 
   /// The initial state of the drawer.
@@ -130,12 +137,14 @@ class NavigationDrawer extends StatefulWidget {
   /// Defaults to 3.
   final double elevation;
 
+  /// The color of the drawer.
+  ///
+  /// Defaults to [MaterialType.canvas] color.
+  final Color? color;
+
   @override
   State<NavigationDrawer> createState() => _NavigationDrawerState();
 }
-
-const _drawerWidth = 304.0;
-const _railWidth = 80.0;
 
 class _NavigationDrawerState extends State<NavigationDrawer>
     with TickerProviderStateMixin {
@@ -232,8 +241,7 @@ class _NavigationDrawerState extends State<NavigationDrawer>
       width: _widthAnimation.value,
       child: Material(
         elevation: widget.elevation,
-        surfaceTintColor: Theme.of(context).colorScheme.surfaceTint,
-        color: Theme.of(context).colorScheme.surface,
+        color: widget.color,
         child: ListView(
           padding: const EdgeInsets.only(bottom: 16),
           children: _buildItems(context),
@@ -260,11 +268,8 @@ class _NavigationDrawerState extends State<NavigationDrawer>
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: ElevationOverlay.applySurfaceTint(
-                          Theme.of(context).colorScheme.surface,
-                          Theme.of(context).colorScheme.surfaceTint,
-                          1,
-                        ),
+                        color: widget.color ??
+                            Theme.of(context).colorScheme.surface,
                         blurRadius: 15,
                         spreadRadius: 5,
                       ),
@@ -347,11 +352,7 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color1 = ElevationOverlay.applySurfaceTint(
-      Colors.transparent,
-      Theme.of(context).colorScheme.primary,
-      1,
-    );
+    final activeColor = Theme.of(context).colorScheme.secondaryContainer;
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: showRailLabel ? 4 + mainAnimation.value * 8 : 12,
@@ -359,12 +360,10 @@ class _Item extends StatelessWidget {
             ? 4 + reversedAnimation.value * 4
             : mainAnimation.value * 4,
       ),
-      child: InkWell(
-        focusColor: color1,
-        splashColor: color1,
-        highlightColor: color1,
-        borderRadius: borderRadius,
+      child: _IndicatorInkWell(
+        railLabelVisible: showRailLabel && reversedAnimation.isDismissed,
         onTap: onTap,
+        borderRadius: borderRadius,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -379,13 +378,7 @@ class _Item extends StatelessWidget {
                   duration: duration,
                   decoration: BoxDecoration(
                     borderRadius: borderRadius,
-                    color: selected
-                        ? ElevationOverlay.applySurfaceTint(
-                            Colors.transparent,
-                            Theme.of(context).colorScheme.primary,
-                            6,
-                          )
-                        : null,
+                    color: selected ? activeColor : null,
                   ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
@@ -459,7 +452,12 @@ class _Item extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           item.label,
-                          style: Theme.of(context).textTheme.labelSmall,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                fontWeight: selected ? FontWeight.w700 : null,
+                              ),
                           maxLines: 1,
                           textAlign: TextAlign.center,
                         ),
@@ -472,5 +470,42 @@ class _Item extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _IndicatorInkWell extends InkResponse {
+  const _IndicatorInkWell({
+    required this.railLabelVisible,
+    super.child,
+    super.onTap,
+    super.borderRadius,
+  }) : super(
+          containedInkWell: true,
+          highlightShape: BoxShape.rectangle,
+        );
+
+  /// Whether the rail label is visible.
+  ///
+  /// If true, the ink effect will be applied to icon only.
+  /// Otherwise, the ink effect will be applied to the whole item.
+  final bool railLabelVisible;
+
+  @override
+  RectCallback? getRectCallback(RenderBox referenceBox) {
+    if (!railLabelVisible) {
+      // The default rect callback for Ink highlight.
+      return super.getRectCallback(referenceBox);
+    }
+
+    final indicatorHorizontalCenter = referenceBox.size.width / 2;
+
+    return () {
+      return Rect.fromLTWH(
+        indicatorHorizontalCenter - (_kCircularIndicatorDiameter / 2),
+        0,
+        _kCircularIndicatorDiameter,
+        _kIndicatorHeight,
+      );
+    };
   }
 }
