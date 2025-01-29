@@ -1,3 +1,8 @@
+## 1.0.3
+
+* Update widget to latest Material specs
+* Add `color` parameter
+
 ## 1.0.2
 
 * Fix conflicts with Flutter 3.7
