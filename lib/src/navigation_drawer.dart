@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 const double _kCircularIndicatorDiameter = 56;
 const double _kIndicatorHeight = 32;
 
-const _drawerWidth = 304.0;
-const _railWidth = 80.0;
+const _defaultDrawerWidth = 304.0;
+const _defaultRailWidth = 80.0;
 
 /// A Material 3 [NavigationDrawer] item.
 ///
@@ -56,9 +56,8 @@ enum DrawerState {
   expanded,
 }
 
-/// Signature for a function that creates a header widget
-/// for [NavigationDrawer].
-typedef HeaderBuilder = Widget Function(
+/// Signature for a function that creates a widget that can animate.
+typedef AnimatedWidgetBuilder = Widget Function(
   BuildContext context,
   Animation<double> animation,
 );
@@ -83,12 +82,15 @@ class NavigationDrawer extends StatefulWidget {
     this.selectedIndex,
     this.onItemTap,
     this.headerBuilder,
+    this.footerBuilder,
     this.itemBorderRadius = const BorderRadius.all(Radius.circular(32)),
     this.mainAnimationDuration = const Duration(milliseconds: 300),
     this.curve = Curves.easeInOutCubic,
     this.showRailLabel = true,
     this.elevation = 3,
     this.color,
+    this.expandedWidth = _defaultDrawerWidth,
+    this.collapsedWidth = _defaultRailWidth,
   }) : shortDuration = mainAnimationDuration ~/ 3;
 
   /// The initial state of the drawer.
@@ -115,7 +117,10 @@ class NavigationDrawer extends StatefulWidget {
   final ValueChanged<int>? onItemTap;
 
   /// A builder that's called to build the header of the drawer.
-  final HeaderBuilder? headerBuilder;
+  final AnimatedWidgetBuilder? headerBuilder;
+
+  /// A builder that's called to build the footer of the drawer.
+  final AnimatedWidgetBuilder? footerBuilder;
 
   /// The list of items in this [NavigationDrawer].
   ///
@@ -157,6 +162,16 @@ class NavigationDrawer extends StatefulWidget {
   /// Defaults to [MaterialType.canvas] color.
   final Color? color;
 
+  /// The width of the expanded drawer.
+  ///
+  /// Defaults to [_defaultDrawerWidth].
+  final double expandedWidth;
+
+  /// The width of the collapsed drawer.
+  ///
+  /// Defaults to [_defaultRailWidth].
+  final double collapsedWidth;
+
   @override
   State<NavigationDrawer> createState() => _NavigationDrawerState();
 }
@@ -180,6 +195,20 @@ class _NavigationDrawerState extends State<NavigationDrawer>
         collapse();
       }
     }
+
+    if (widget.expandedWidth != oldWidget.expandedWidth ||
+        widget.collapsedWidth != oldWidget.collapsedWidth) {
+      _widthAnimation = Tween<double>(
+        begin: widget.collapsedWidth,
+        end: widget.expandedWidth,
+      ).animate(
+        CurvedAnimation(
+          parent: _controller,
+          curve: widget.curve,
+        ),
+      );
+    }
+
     super.didUpdateWidget(oldWidget);
   }
 
@@ -193,8 +222,8 @@ class _NavigationDrawerState extends State<NavigationDrawer>
     );
 
     _widthAnimation = Tween<double>(
-      begin: _railWidth,
-      end: _drawerWidth,
+      begin: widget.collapsedWidth,
+      end: widget.expandedWidth,
     ).animate(
       CurvedAnimation(
         parent: _controller,
@@ -257,9 +286,17 @@ class _NavigationDrawerState extends State<NavigationDrawer>
       child: Material(
         elevation: widget.elevation,
         color: widget.color,
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 16),
-          children: _buildItems(context),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.only(bottom: 16),
+                children: _buildItems(context),
+              ),
+            ),
+            if (widget.footerBuilder != null)
+              widget.footerBuilder!.call(context, _controller),
+          ],
         ),
       ),
     );
@@ -278,7 +315,7 @@ class _NavigationDrawerState extends State<NavigationDrawer>
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Container(
-                  width: _railWidth,
+                  width: widget.collapsedWidth,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     boxShadow: [
@@ -325,6 +362,8 @@ class _NavigationDrawerState extends State<NavigationDrawer>
           borderRadius: widget.itemBorderRadius,
           duration: widget.shortDuration,
           showRailLabel: widget.showRailLabel,
+          expandedWidth: widget.expandedWidth,
+          collapsedWidth: widget.collapsedWidth,
         ),
       );
     }
@@ -350,7 +389,9 @@ class _Item extends StatelessWidget {
     required this.reversedSecondaryAnimation,
     required this.borderRadius,
     required this.duration,
-    this.showRailLabel = true,
+    required this.showRailLabel,
+    required this.expandedWidth,
+    required this.collapsedWidth,
   });
 
   final bool selected;
@@ -364,6 +405,8 @@ class _Item extends StatelessWidget {
   final BorderRadius borderRadius;
   final Duration duration;
   final bool showRailLabel;
+  final double expandedWidth;
+  final double collapsedWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -431,7 +474,7 @@ class _Item extends StatelessWidget {
                             axis: Axis.horizontal,
                             sizeFactor: secondaryAnimation,
                             child: SizedBox(
-                              width: _drawerWidth,
+                              width: expandedWidth,
                               child: Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 12),
@@ -463,7 +506,7 @@ class _Item extends StatelessWidget {
               SizeTransition(
                 sizeFactor: reversedAnimation,
                 child: SizedBox(
-                  width: _railWidth - 8,
+                  width: collapsedWidth - 8,
                   child: FadeTransition(
                     opacity: reversedSecondaryAnimation,
                     child: Column(
